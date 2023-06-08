@@ -65,6 +65,7 @@ public class MainActivity extends Activity {
         colaPeticiones= Volley.newRequestQueue(this);
         listarProductos();
         //Delete button
+        /* 
         btnEliminar.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
@@ -100,10 +101,56 @@ public class MainActivity extends Activity {
                 );
                 colaPeticiones.add(jsonObjectRequest);
             }
+        });*/
+         btnEliminar.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                if (etCodigoBaras.getText().toString().isEmpty()) {
+                    Toast.makeText(MainActivity.this, "Ingrese el código de barras", Toast.LENGTH_SHORT).show();
+                } else {
+                    JsonObjectRequest jsonObjectRequest = new JsonObjectRequest(
+                            Request.Method.DELETE,
+                            url + "borrar/" + etCodigoBaras.getText().toString(),
+                            null,
+                            new Response.Listener<JSONObject>() {
+                                @Override
+                                public void onResponse(JSONObject response) {
+                                    try {
+                                        if (response.getString("status").equals("Producto eliminado")) {
+                                            Toast.makeText(MainActivity.this, "Producto Eliminado con EXITO!", Toast.LENGTH_SHORT).show();
+                                            etCodigoBaras.setText("");
+                                            etDescripcion.setText("");
+                                            etMarca.setText("");
+                                            etPrecioCompra.setText("");
+                                            etPrecioVenta.setText("");
+                                            etExistencia.setText("");
+                                            adapter.clear();
+                                            lvProductos.setAdapter(adapter);
+                                            listarProductos();
+                                        } else if (response.getString("status").equals("Not Found")) {
+                                            Toast.makeText(MainActivity.this, "Producto no encontrado", Toast.LENGTH_SHORT).show();
+                                        }
+
+                                    } catch (JSONException e) {
+                                        Toast.makeText(MainActivity.this, e.getMessage(), Toast.LENGTH_SHORT).show();
+                                    }
+                                }
+                            },
+                            new Response.ErrorListener() {
+                                @Override
+                                public void onErrorResponse(VolleyError error) {
+                                    Toast.makeText(MainActivity.this, error.getMessage(), Toast.LENGTH_SHORT).show();
+                                }
+                            }
+                    );
+                    colaPeticiones.add(jsonObjectRequest);
+                }
+            }
         });
 
 
-        //Button update
+
+        /*Button update
         btnActualizar.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
@@ -153,6 +200,81 @@ public class MainActivity extends Activity {
                 colaPeticiones.add(jsonObjectRequest);
             }
         });
+
+        */
+        //Button update
+        btnActualizar.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                if (etCodigoBaras.getText().toString().isEmpty()) {
+                    Toast.makeText(MainActivity.this, "Primero use el BOTÓN BUSCAR!", Toast.LENGTH_SHORT).show();
+                } else {
+                    JSONObject productos = new JSONObject();
+                    try {
+                        productos.put("codigobarras", etCodigoBaras.getText().toString());
+                        if (!etDescripcion.getText().toString().isEmpty()) {
+                            productos.put("descripcion", etDescripcion.getText().toString());
+                        }
+
+                        if (!etMarca.getText().toString().isEmpty()) {
+                            productos.put("marca", etMarca.getText().toString());
+                        }
+
+                        if (!etPrecioCompra.getText().toString().isEmpty()) {
+                            productos.put("preciocompra", Float.parseFloat(etPrecioCompra.getText().toString()));
+                        }
+
+                        if (!etPrecioVenta.getText().toString().isEmpty()) {
+                            productos.put("precioventa", Float.parseFloat(etPrecioVenta.getText().toString()));
+                        }
+
+                        if (!etExistencia.getText().toString().isEmpty()) {
+                            productos.put("existencias", Float.parseFloat(etExistencia.getText().toString()));
+                        }
+
+                    } catch (JSONException e) {
+                        Toast.makeText(MainActivity.this, e.getMessage(), Toast.LENGTH_SHORT).show();
+                    }
+                    JsonObjectRequest actualizar = new JsonObjectRequest(
+                            Request.Method.PUT,
+                            url + "actualizar/" + etCodigoBaras.getText().toString(),
+                            productos,
+                            new Response.Listener<JSONObject>() {
+                                @Override
+                                public void onResponse(JSONObject response) {
+                                    try {
+                                        if (response.getString("status").equals("Producto actualizado")) {
+                                            Toast.makeText(MainActivity.this, "Producto actualizado con EXITO!", Toast.LENGTH_SHORT).show();
+                                            etCodigoBaras.setText("");
+                                            etDescripcion.setText("");
+                                            etMarca.setText("");
+                                            etPrecioCompra.setText("");
+                                            etPrecioVenta.setText("");
+                                            etExistencia.setText("");
+                                            adapter.clear();
+                                            lvProductos.setAdapter(adapter);
+                                            listarProductos();
+                                        } else if (response.getString("status").equals("No encontrado")) {
+                                            Toast.makeText(MainActivity.this, "Producto no encontrado", Toast.LENGTH_SHORT).show();
+                                        }
+
+                                    } catch (JSONException e) {
+                                        Toast.makeText(MainActivity.this, e.getMessage(), Toast.LENGTH_SHORT).show();
+                                    }
+                                }
+                            },
+                            new Response.ErrorListener() {
+                                @Override
+                                public void onErrorResponse(VolleyError error) {
+                                    Toast.makeText(MainActivity.this, error.getMessage(), Toast.LENGTH_SHORT).show();
+                                }
+                            }
+                    );
+                    colaPeticiones.add(actualizar);
+                }
+            }
+        });
+
         btnBuscar.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
